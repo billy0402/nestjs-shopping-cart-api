@@ -1,0 +1,200 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+/// 使用者
+model User {
+  /// ID
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  /// 電子郵件（唯一）
+  email     String   @unique
+  /// 密碼
+  password  String
+  /// 姓名
+  name      String
+  /// 角色
+  role      Role     @default(USER)
+  /// 建立時間
+  createdAt DateTime @default(now())
+  /// 更新時間
+  updatedAt DateTime @updatedAt
+
+  /// [反向關聯] 購物車列表
+  carts  Cart[]
+  /// [反向關聯] 訂單列表
+  orders Order[]
+}
+
+/// 角色
+enum Role {
+  /// 一般使用者
+  USER
+  /// 管理者
+  ADMIN
+}
+
+/// 產品
+model Product {
+  /// ID
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  /// 名稱
+  name        String
+  /// 描述
+  description String?
+  /// [外鍵] 產品類別 ID
+  categoryId  String        @db.ObjectId
+  /// 價格
+  price       Int
+  /// 圖片
+  image       String?
+  /// 評分
+  rating      ProductRating
+  /// 建立時間
+  createdAt   DateTime      @default(now())
+  /// 更新時間
+  updatedAt   DateTime      @updatedAt
+
+  /// [關聯] 產品類別
+  category     Category      @relation(fields: [categoryId], references: [id])
+  /// [反向關聯] 有此產品的購物車列表
+  cartProducts CartProduct[]
+}
+
+/// 產品類別
+model Category {
+  /// ID
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  /// 名稱
+  name      String
+  /// 建立時間
+  createdAt DateTime @default(now())
+  /// 更新時間
+  updatedAt DateTime @updatedAt
+
+  /// [反向關聯] 產品列表
+  products Product[]
+}
+
+/// 產品評分 (這部分會用亂數模擬的方式，簡化範例實作)
+type ProductRating {
+  /// 評分
+  rate  Float
+  /// 評分總數
+  count Int
+}
+
+/// 購物車
+model Cart {
+  /// ID
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  /// [外鍵] 使用者 ID
+  userId    String   @db.ObjectId
+  /// 建立時間
+  createdAt DateTime @default(now())
+  /// 更新時間
+  updatedAt DateTime @updatedAt
+
+  /// [關聯] 使用者
+  user     User          @relation(fields: [userId], references: [id])
+  /// [反向關聯] 產品列表
+  products CartProduct[]
+}
+
+/// 購物車中的產品
+model CartProduct {
+  /// ID
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  /// [外鍵] 購物車 ID
+  cartId    String @db.ObjectId
+  /// [外鍵] 產品 ID
+  productId String @db.ObjectId
+  /// 數量
+  quantity  Int
+
+  /// [關聯] 購物車
+  cart    Cart    @relation(fields: [cartId], references: [id])
+  /// [關聯] 產品
+  product Product @relation(fields: [productId], references: [id])
+}
+
+/// 訂單
+model Order {
+  /// ID
+  id        String         @id @default(auto()) @map("_id") @db.ObjectId
+  /// [外鍵] 使用者 ID
+  userId    String         @db.ObjectId
+  /// [嵌套] 產品列表
+  products  OrderProduct[]
+  /// 運費
+  shipping  Int
+  /// 訂單狀態
+  status    OrderStatus
+  /// 建立時間
+  createdAt DateTime       @default(now())
+  /// 更新時間
+  updatedAt DateTime       @updatedAt
+
+  /// [關聯] 使用者
+  user User @relation(fields: [userId], references: [id])
+}
+
+/// 訂單中的產品
+type OrderProduct {
+  /// ID
+  id          String
+  /// 名稱
+  name        String
+  /// 描述
+  description String?
+  /// 產品類別
+  category    ProductItemCategory
+  /// 價格
+  price       Int
+  /// 圖片
+  image       String?
+  /// 評分
+  rating      ProductRating
+  /// 數量
+  quantity    Int
+  /// 建立時間
+  createdAt   DateTime
+  /// 更新時間
+  updatedAt   DateTime
+}
+
+/// 產品類別
+type ProductItemCategory {
+  /// ID
+  id        String
+  /// 名稱
+  name      String
+  /// 建立時間
+  createdAt DateTime
+  /// 更新時間
+  updatedAt DateTime
+}
+
+/// 訂單狀態
+enum OrderStatus {
+  /// 待處理
+  PENDING
+  /// 已確認
+  CONFIRMED
+  /// 已出貨
+  SHIPPED
+  /// 已完成
+  DELIVERED
+  /// 已取消
+  CANCELLED
+}
