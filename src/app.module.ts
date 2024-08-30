@@ -8,6 +8,8 @@ import { ENVSchema } from '@/models/env';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+
+import { AdminAuthModule } from './apps/admin-auth/admin-auth.module';
 import { AdminProductsModule } from './apps/admin-products/admin-products.module';
 
 @Module({
@@ -16,6 +18,7 @@ import { AdminProductsModule } from './apps/admin-products/admin-products.module
       isGlobal: true,
       validate: (config) => ENVSchema.parse(config),
     }),
+    AdminAuthModule,
     AdminProductsModule,
   ],
   controllers: [AppController],
