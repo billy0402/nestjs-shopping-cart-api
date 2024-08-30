@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
+import { Role } from '@prisma/client';
 import { ZodSerializerDto } from 'nestjs-zod';
 
 import {
@@ -20,6 +21,7 @@ import {
   UserInfoDto,
 } from '@/dto/auth.dto';
 import { AuthGuard } from '@/guards/auth/auth.guard';
+import { Roles, RolesGuard } from '@/guards/roles/roles.guard';
 import { UsersService } from '@/services/users/users.service';
 
 import { AdminAuthService } from './admin-auth.service';
@@ -57,7 +59,8 @@ export class AdminAuthController {
 
   @ApiOkResponse({ type: UserInfoDto })
   @ZodSerializerDto(UserInfoDto)
-  @UseGuards(AuthGuard)
+  @Roles([Role.ADMIN])
+  @UseGuards(AuthGuard, RolesGuard)
   @Get('me')
   me(@Request() request) {
     return request.user;
