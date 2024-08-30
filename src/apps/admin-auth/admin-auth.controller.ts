@@ -1,4 +1,13 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import { ZodSerializerDto } from 'nestjs-zod';
@@ -10,6 +19,7 @@ import {
   TokenPayloadDto,
   UserInfoDto,
 } from '@/dto/auth.dto';
+import { AuthGuard } from '@/guards/auth/auth.guard';
 import { UsersService } from '@/services/users/users.service';
 
 import { AdminAuthService } from './admin-auth.service';
@@ -43,5 +53,13 @@ export class AdminAuthController {
   @Post('register')
   async register(@Body() data: RegisterAdminInDto) {
     return await this.userService.create(data);
+  }
+
+  @ApiOkResponse({ type: UserInfoDto })
+  @ZodSerializerDto(UserInfoDto)
+  @UseGuards(AuthGuard)
+  @Get('me')
+  me(@Request() request) {
+    return request.user;
   }
 }
