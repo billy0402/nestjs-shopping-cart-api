@@ -1,14 +1,23 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
+
+import { ENVSchema } from '@/models/env';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AdminProductsModule } from './apps/admin-products/admin-products.module';
 
 @Module({
-  imports: [AdminProductsModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validate: (config) => ENVSchema.parse(config),
+    }),
+    AdminProductsModule,
+  ],
   controllers: [AppController],
   providers: [
     AppService,
