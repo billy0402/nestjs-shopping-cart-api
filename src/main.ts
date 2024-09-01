@@ -42,6 +42,11 @@ async function bootstrap() {
 
   setupSwagger(app);
 
+  // 設定 CORS
+  app.enableCors({
+    origin: ['http://localhost:3000'],
+  });
+
   // 設定監聽埠號 3001
   // 沒有設定 0.0.0.0 的話，下面 app.getUrl 會回傳 http://[::1]:3001
   await app.listen(3001, '0.0.0.0');
