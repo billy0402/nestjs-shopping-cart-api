@@ -1,45 +1,70 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Param,
-  Patch,
   Post,
+  Put,
+  Res,
 } from '@nestjs/common';
+
+import { Response } from 'express';
+
+import {
+  ProductInDto,
+  ProductInSchema,
+  ProductOutSchema,
+} from '@/dto/product.dto';
+
 import { AdminProductsService } from './admin-products.service';
-import { CreateAdminProductDto } from './dto/create-admin-product.dto';
-import { UpdateAdminProductDto } from './dto/update-admin-product.dto';
 
 @Controller('admin/products')
 export class AdminProductsController {
   constructor(private readonly adminProductsService: AdminProductsService) {}
 
-  @Post()
-  create(@Body() createAdminProductDto: CreateAdminProductDto) {
-    return this.adminProductsService.create(createAdminProductDto);
-  }
-
   @Get()
-  findAll() {
-    return this.adminProductsService.findAll();
+  async findAll() {
+    const products = await this.adminProductsService.findAll();
+    return ProductOutSchema.array().parse(products);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.adminProductsService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const product = await this.adminProductsService.findOne(id);
+    return ProductOutSchema.parse(product);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateAdminProductDto: UpdateAdminProductDto,
-  ) {
-    return this.adminProductsService.update(+id, updateAdminProductDto);
+  @Post()
+  async create(@Body() product: ProductInDto) {
+    const parsed = ProductInSchema.safeParse(product);
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.errors);
+    }
+
+    const createdProduct = await this.adminProductsService.create(parsed.data);
+    return ProductOutSchema.parse(createdProduct);
+  }
+
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() product: ProductInDto) {
+    const parsed = ProductInSchema.safeParse(product);
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.errors);
+    }
+
+    const updatedProduct = await this.adminProductsService.update(
+      id,
+      parsed.data,
+    );
+    return ProductOutSchema.parse(updatedProduct);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.adminProductsService.remove(+id);
+  async remove(@Param('id') id: string, @Res() res: Response) {
+    await this.adminProductsService.remove(id);
+    return res.status(HttpStatus.NO_CONTENT).send();
   }
 }
