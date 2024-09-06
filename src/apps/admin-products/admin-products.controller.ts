@@ -8,6 +8,7 @@ import {
   Post,
   Put,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -16,14 +17,19 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
+import { Role } from '@prisma/client';
 import { Response } from 'express';
 import { ZodSerializerDto } from 'nestjs-zod';
 
 import { ProductInDto, ProductOutDto } from '@/dto/product.dto';
+import { AuthGuard } from '@/guards/auth/auth.guard';
+import { Roles, RolesGuard } from '@/guards/roles/roles.guard';
 
 import { AdminProductsService } from './admin-products.service';
 
 @ApiTags('admin-products')
+@Roles([Role.ADMIN])
+@UseGuards(AuthGuard, RolesGuard)
 @Controller('admin/products')
 export class AdminProductsController {
   constructor(private readonly adminProductsService: AdminProductsService) {}

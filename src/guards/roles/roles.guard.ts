@@ -11,7 +11,10 @@ export class RolesGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     // 取得 Roles 裝飾器的參數，也就是允許的角色
-    const roles = this.reflector.get(Roles, context.getHandler());
+    const roles = this.reflector.getAllAndOverride(Roles, [
+      context.getHandler(), // Method like AdminProductsController.findAll
+      context.getClass(), // Class like AdminProductsController
+    ]);
     // 沒有 Roles 裝飾器，則代表不需要驗證角色，會直接通過
     if (!roles) {
       return true;
