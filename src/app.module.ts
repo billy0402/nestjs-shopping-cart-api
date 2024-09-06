@@ -11,6 +11,7 @@ import { AppService } from './app.service';
 
 import { AdminAuthModule } from './apps/admin-auth/admin-auth.module';
 import { AdminCategoriesModule } from './apps/admin-categories/admin-categories.module';
+import { AdminOrdersModule } from './apps/admin-orders/admin-orders.module';
 import { AdminProductsModule } from './apps/admin-products/admin-products.module';
 
 @Module({
@@ -22,6 +23,7 @@ import { AdminProductsModule } from './apps/admin-products/admin-products.module
     AdminAuthModule,
     AdminProductsModule,
     AdminCategoriesModule,
+    AdminOrdersModule,
   ],
   controllers: [AppController],
   providers: [
