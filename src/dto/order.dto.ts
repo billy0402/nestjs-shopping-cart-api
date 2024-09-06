@@ -2,6 +2,12 @@ import { OrderStatus, Role } from '@prisma/client';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
+export const OrderInSchema = z.object({
+  cartId: z.string().min(1),
+  shipping: z.number().int().min(0),
+});
+export class OrderInDto extends createZodDto(OrderInSchema) {}
+
 export const OrderOutSchema = z.object({
   id: z.string().min(1),
   user: z.object({
