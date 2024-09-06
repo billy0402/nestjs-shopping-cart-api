@@ -13,6 +13,7 @@ import { AdminAuthModule } from './apps/admin-auth/admin-auth.module';
 import { AdminCategoriesModule } from './apps/admin-categories/admin-categories.module';
 import { AdminOrdersModule } from './apps/admin-orders/admin-orders.module';
 import { AdminProductsModule } from './apps/admin-products/admin-products.module';
+import { AdminUsersModule } from './apps/admin-users/admin-users.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AdminProductsModule } from './apps/admin-products/admin-products.module
       validate: (config) => ENVSchema.parse(config),
     }),
     AdminAuthModule,
+    AdminUsersModule,
     AdminProductsModule,
     AdminCategoriesModule,
     AdminOrdersModule,
