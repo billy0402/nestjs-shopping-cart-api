@@ -8,12 +8,17 @@ export class AdminProductsService {
   constructor(private prisma: PrismaService) {}
 
   async findAll() {
-    return await this.prisma.product.findMany();
+    return await this.prisma.product.findMany({
+      include: { category: true },
+    });
   }
 
   async findOne(id: string) {
     // 檢查是否有此產品
-    const product = await this.prisma.product.findUnique({ where: { id } });
+    const product = await this.prisma.product.findUnique({
+      include: { category: true },
+      where: { id },
+    });
     if (!product) {
       throw new BadRequestException('沒有找到對應產品');
     }
@@ -22,14 +27,37 @@ export class AdminProductsService {
   }
 
   async create(data: ProductInDto) {
-    return await this.prisma.product.create({ data });
+    // 檢查是否有此分類
+    const category = await this.prisma.category.findUnique({
+      where: { id: data.categoryId },
+    });
+    if (!category) {
+      throw new BadRequestException('沒有找到對應分類');
+    }
+
+    return await this.prisma.product.create({
+      data,
+      include: { category: true },
+    });
   }
 
   async update(id: string, data: ProductInDto) {
     // 檢查是否有此產品
     await this.findOne(id);
 
-    return await this.prisma.product.update({ data, where: { id } });
+    // 檢查是否有此分類
+    const category = await this.prisma.category.findUnique({
+      where: { id: data.categoryId },
+    });
+    if (!category) {
+      throw new BadRequestException('沒有找到對應分類');
+    }
+
+    return await this.prisma.product.update({
+      data,
+      include: { category: true },
+      where: { id },
+    });
   }
 
   async remove(id: string) {

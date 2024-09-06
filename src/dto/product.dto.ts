@@ -20,7 +20,12 @@ export const ProductOutSchema = z.object({
   id: z.string().min(1),
   name: z.string(),
   description: z.string().nullish().default(null),
-  categoryId: z.string(),
+  category: z.object({
+    id: z.string().min(1),
+    name: z.string(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+  }),
   price: z.number().int(),
   image: z.string().url().nullish().or(z.literal('')),
   rating: z.object({
