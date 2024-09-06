@@ -1,9 +1,11 @@
-import type { INestApplication } from '@nestjs/common';
-import { Logger, VersioningType } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { Logger, VersioningType, type INestApplication } from '@nestjs/common';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+import { patchNestJsSwagger } from 'nestjs-zod';
+
 import { AppModule } from './app.module';
+import { ZodExceptionsFilter } from './filters/zod-exceptions/zod-exceptions.filter';
 
 function setApiPrefix(app: INestApplication) {
   // 加上前缀 /api
@@ -18,6 +20,10 @@ function setupSwagger(app: INestApplication) {
     .setDescription('A RESTful API')
     .setVersion('1.0')
     .build();
+
+  // 添加補丁，根據 zod 的 schema 生成 swagger 的 schema
+  patchNestJsSwagger();
+
   const document = SwaggerModule.createDocument(app, config);
   // 生成 schema.json 和 schema.yaml，可以供其他工具使用
   SwaggerModule.setup('/api/docs', app, document, {
@@ -29,7 +35,13 @@ function setupSwagger(app: INestApplication) {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   setApiPrefix(app);
+
+  // 捕捉 Zod 錯誤
+  const { httpAdapter } = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new ZodExceptionsFilter(httpAdapter));
+
   setupSwagger(app);
+
   // 設定監聽埠號 3001
   // 沒有設定 0.0.0.0 的話，下面 app.getUrl 會回傳 http://[::1]:3001
   await app.listen(3001, '0.0.0.0');

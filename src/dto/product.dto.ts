@@ -1,3 +1,4 @@
+import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
 export const ProductInSchema = z.object({
@@ -13,7 +14,7 @@ export const ProductInSchema = z.object({
     })
     .default({ rate: 5, count: 0 }),
 });
-export type ProductInDto = z.infer<typeof ProductInSchema>;
+export class ProductInDto extends createZodDto(ProductInSchema) {}
 
 export const ProductOutSchema = z.object({
   id: z.string().min(1),
@@ -29,4 +30,4 @@ export const ProductOutSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date(),
 });
-export type ProductOutDto = z.infer<typeof ProductOutSchema>;
+export class ProductOutDto extends createZodDto(ProductOutSchema) {}

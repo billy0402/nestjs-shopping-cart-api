@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -10,58 +9,54 @@ import {
   Put,
   Res,
 } from '@nestjs/common';
+import {
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { Response } from 'express';
+import { ZodSerializerDto } from 'nestjs-zod';
 
-import {
-  ProductInDto,
-  ProductInSchema,
-  ProductOutSchema,
-} from '@/dto/product.dto';
+import { ProductInDto, ProductOutDto } from '@/dto/product.dto';
 
 import { AdminProductsService } from './admin-products.service';
 
+@ApiTags('admin-products')
 @Controller('admin/products')
 export class AdminProductsController {
   constructor(private readonly adminProductsService: AdminProductsService) {}
 
+  @ApiOkResponse({ type: ProductOutDto, isArray: true })
+  @ZodSerializerDto(ProductOutDto)
   @Get()
   async findAll() {
-    const products = await this.adminProductsService.findAll();
-    return ProductOutSchema.array().parse(products);
+    return await this.adminProductsService.findAll();
   }
 
+  @ApiOkResponse({ type: ProductOutDto })
+  @ZodSerializerDto(ProductOutDto)
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    const product = await this.adminProductsService.findOne(id);
-    return ProductOutSchema.parse(product);
+    return await this.adminProductsService.findOne(id);
   }
 
+  @ApiCreatedResponse({ type: ProductOutDto })
+  @ZodSerializerDto(ProductOutDto)
   @Post()
   async create(@Body() product: ProductInDto) {
-    const parsed = ProductInSchema.safeParse(product);
-    if (!parsed.success) {
-      throw new BadRequestException(parsed.error.errors);
-    }
-
-    const createdProduct = await this.adminProductsService.create(parsed.data);
-    return ProductOutSchema.parse(createdProduct);
+    return await this.adminProductsService.create(product);
   }
 
+  @ApiOkResponse({ type: ProductOutDto })
+  @ZodSerializerDto(ProductOutDto)
   @Put(':id')
   async update(@Param('id') id: string, @Body() product: ProductInDto) {
-    const parsed = ProductInSchema.safeParse(product);
-    if (!parsed.success) {
-      throw new BadRequestException(parsed.error.errors);
-    }
-
-    const updatedProduct = await this.adminProductsService.update(
-      id,
-      parsed.data,
-    );
-    return ProductOutSchema.parse(updatedProduct);
+    return await this.adminProductsService.update(id, product);
   }
 
+  @ApiNoContentResponse()
   @Delete(':id')
   async remove(@Param('id') id: string, @Res() res: Response) {
     await this.adminProductsService.remove(id);
