@@ -14,6 +14,7 @@ import { AdminCategoriesModule } from './apps/admin-categories/admin-categories.
 import { AdminOrdersModule } from './apps/admin-orders/admin-orders.module';
 import { AdminProductsModule } from './apps/admin-products/admin-products.module';
 import { AdminUsersModule } from './apps/admin-users/admin-users.module';
+import { ClientAuthModule } from './apps/client-auth/client-auth.module';
 import { PublicCategoriesModule } from './apps/public-categories/public-categories.module';
 import { PublicProductsModule } from './apps/public-products/public-products.module';
 
@@ -25,6 +26,7 @@ import { PublicProductsModule } from './apps/public-products/public-products.mod
     }),
     PublicProductsModule,
     PublicCategoriesModule,
+    ClientAuthModule,
     AdminAuthModule,
     AdminUsersModule,
     AdminProductsModule,
